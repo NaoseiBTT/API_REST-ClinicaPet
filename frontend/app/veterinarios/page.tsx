@@ -38,8 +38,11 @@ export default function VeterinariosPage() {
   const [clinicas, setClinicas] = useState<Clinica[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // Estados de controlo de formulário inline (sem modal)
+  const [isFormVisible, setIsFormVisible] = useState(false);
   const [editingVet, setEditingVet] = useState<Veterinario | null>(null);
+
+  // Estados dos campos
   const [nome, setNome] = useState('');
   const [crmv, setCrmv] = useState('');
   const [especialidade, setEspecialidade] = useState('');
@@ -49,7 +52,6 @@ export default function VeterinariosPage() {
 
   const fetchData = async () => {
     setLoading(true);
-
     try {
       const [vData, cData] = await Promise.all([
         api.getVeterinarios(),
@@ -106,7 +108,7 @@ export default function VeterinariosPage() {
     setEmail('');
     setTelefone('');
     setSelectedClinicaIds([]);
-    setIsModalOpen(true);
+    setIsFormVisible(true);
   };
 
   const handleOpenEdit = (vet: Veterinario) => {
@@ -132,11 +134,11 @@ export default function VeterinariosPage() {
       ids.push(Number(vet.clinica_id));
     }
     setSelectedClinicaIds(ids);
-    setIsModalOpen(true);
+    setIsFormVisible(true);
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+  const handleCloseForm = () => {
+    setIsFormVisible(false);
     setEditingVet(null);
   };
 
@@ -179,7 +181,7 @@ export default function VeterinariosPage() {
       }
 
       await fetchData();
-      handleCloseModal();
+      handleCloseForm();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Erro ao salvar veterinário.';
       alert(msg);
@@ -285,19 +287,106 @@ export default function VeterinariosPage() {
 
   return (
     <div className="space-y-6 pb-10">
+      {/* Formulário integrado na própria página (em substituição do modal) */}
+      {isFormVisible && (
+        <section className="bg-white/90 backdrop-blur-md rounded-sm border border-slate-200/70 shadow-sm p-6 mb-6">
+          <div className="flex justify-between items-center pb-4 mb-5 border-b border-slate-200/60">
+            <h3 className="text-lg font-extrabold text-slate-900 tracking-tight">
+              {editingVet ? 'Editar Veterinário' : 'Cadastrar Novo Veterinário'}
+            </h3>
+            <button
+              type="button"
+              onClick={handleCloseForm}
+              className="text-slate-400 hover:text-slate-700 text-sm font-bold transition-colors cursor-pointer"
+            >
+              ✕ Fechar
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="vetNome" className="block text-xs font-bold text-slate-600 uppercase mb-1">Nome *</label>
+              <input id="vetNome" type="text" required placeholder="Ex: Dr. Carlos Silva" value={nome} onChange={(e) => setNome(e.target.value)} className="w-full px-4 py-2.5 rounded-sm border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-800 text-sm" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="vetCrmv" className="block text-xs font-bold text-slate-600 uppercase mb-1">CRMV *</label>
+                <input id="vetCrmv" type="text" required placeholder="Ex: 12345/PE" value={crmv} onChange={(e) => setCrmv(e.target.value)} className="w-full px-4 py-2.5 rounded-sm border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-800 text-sm" />
+              </div>
+              <div>
+                <label htmlFor="vetEsp" className="block text-xs font-bold text-slate-600 uppercase mb-1">Especialidade *</label>
+                <select 
+                  id="vetEsp" 
+                  required 
+                  value={especialidade} 
+                  onChange={(e) => setEspecialidade(e.target.value)} 
+                  className="w-full px-4 py-2.5 rounded-sm border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-800 text-sm bg-white cursor-pointer"
+                >
+                  <option value="" disabled>Selecione...</option>
+                  {ESPECIALIDADES_COMUNS.map((esp) => (
+                    <option key={esp} value={esp}>
+                      {esp}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="vetEmail" className="block text-xs font-bold text-slate-600 uppercase mb-1">E-mail *</label>
+                <input id="vetEmail" type="email" required placeholder="Ex: carlos@gmail.com" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-2.5 rounded-sm border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-800 text-sm" />
+              </div>
+              <div>
+                <label htmlFor="vetTel" className="block text-xs font-bold text-slate-600 uppercase mb-1">Telefone *</label>
+                <input id="vetTel" type="text" required placeholder="Ex: (87) 99999-9999" value={telefone} onChange={(e) => setTelefone(e.target.value)} className="w-full px-4 py-2.5 rounded-sm border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-800 text-sm" />
+              </div>
+            </div>
+            <div>
+              <span className="block text-xs font-bold text-slate-600 uppercase mb-2">Clínica(s) de Atuação *</span>
+              <div className="max-h-36 overflow-y-auto space-y-2 border border-slate-200 p-3 rounded-sm bg-slate-50/50">
+                {clinicas.map((c) => {
+                  const checkboxId = `clinica-checkbox-${c.id}`;
+                  return (
+                    <label key={c.id} htmlFor={checkboxId} className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer select-none">
+                      <input
+                        id={checkboxId}
+                        type="checkbox"
+                        checked={selectedClinicaIds.includes(c.id)}
+                        onChange={() => handleCheckboxClinicaChange(c.id)}
+                        className="rounded-sm border-slate-300 text-teal-600 focus:ring-teal-500 w-4 h-4 cursor-pointer"
+                      />
+                      <span>{c.nome}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t border-slate-200/60 mt-6">
+              <button type="button" onClick={handleCloseForm} className="px-5 py-2.5 rounded-sm font-semibold text-slate-600 hover:bg-slate-100 text-sm transition cursor-pointer">Cancelar</button>
+              <button type="submit" className="px-5 py-2.5 rounded-sm font-semibold bg-teal-500 hover:bg-teal-600 text-white text-sm shadow-md transition cursor-pointer">
+                {editingVet ? 'Salvar Alterações' : 'Cadastrar'}
+              </button>
+            </div>
+          </form>
+        </section>
+      )}
+
       <section className="bg-white/90 backdrop-blur-md rounded-sm border border-slate-200/70 shadow-sm overflow-hidden">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 p-6 border-b border-slate-200/80 bg-slate-50/50">
           <div>
             <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Módulo de Veterinários</h2>
           </div>
-          <button
-            type="button"
-            onClick={handleOpenCreate}
-            className="group relative inline-flex items-center gap-2 px-5 py-2.5 rounded-sm font-semibold bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white text-sm shadow-md shadow-teal-500/20 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-          >
-            <span className="text-lg leading-none">+</span>
-            <span>Novo Veterinário</span>
-          </button>
+          {!isFormVisible && (
+            <button
+              type="button"
+              onClick={handleOpenCreate}
+              className="group relative inline-flex items-center gap-2 px-5 py-2.5 rounded-sm font-semibold bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white text-sm shadow-md shadow-teal-500/20 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+            >
+              <span className="text-lg leading-none">+</span>
+              <span>Novo Veterinário</span>
+            </button>
+          )}
         </header>
 
         <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-white">
@@ -311,86 +400,6 @@ export default function VeterinariosPage() {
 
         {renderVeterinariosContent()}
       </section>
-
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white/95 backdrop-blur-md rounded-sm max-w-md w-full p-6 shadow-2xl border border-slate-200/80">
-            <div className="flex justify-between items-center pb-4 mb-5 border-b border-slate-200/60 bg-slate-50/50 -mx-6 -mt-6 px-6 pt-6">
-              <h3 className="text-lg font-extrabold text-slate-900 tracking-tight">
-                {editingVet ? 'Editar Veterinário' : 'Cadastrar Novo Veterinário'}
-              </h3>
-              <button type="button" onClick={handleCloseModal} className="text-slate-400 hover:text-slate-700 text-sm font-bold transition-colors cursor-pointer">✕</button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="vetNome" className="block text-xs font-bold text-slate-600 uppercase mb-1">Nome *</label>
-                <input id="vetNome" type="text" required placeholder="Ex: Dr. Carlos Silva" value={nome} onChange={(e) => setNome(e.target.value)} className="w-full px-4 py-2.5 rounded-sm border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-800 text-sm" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="vetCrmv" className="block text-xs font-bold text-slate-600 uppercase mb-1">CRMV *</label>
-                  <input id="vetCrmv" type="text" required placeholder="Ex: 12345/PE" value={crmv} onChange={(e) => setCrmv(e.target.value)} className="w-full px-4 py-2.5 rounded-sm border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-800 text-sm" />
-                </div>
-                <div>
-                  <label htmlFor="vetEsp" className="block text-xs font-bold text-slate-600 uppercase mb-1">Especialidade *</label>
-                  <select 
-                    id="vetEsp" 
-                    required 
-                    value={especialidade} 
-                    onChange={(e) => setEspecialidade(e.target.value)} 
-                    className="w-full px-4 py-2.5 rounded-sm border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-800 text-sm bg-white cursor-pointer"
-                  >
-                    <option value="" disabled>Selecione...</option>
-                    {ESPECIALIDADES_COMUNS.map((esp) => (
-                      <option key={esp} value={esp}>
-                        {esp}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="vetEmail" className="block text-xs font-bold text-slate-600 uppercase mb-1">E-mail *</label>
-                  <input id="vetEmail" type="email" required placeholder="Ex: carlos@gmail.com" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-2.5 rounded-sm border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-800 text-sm" />
-                </div>
-                <div>
-                  <label htmlFor="vetTel" className="block text-xs font-bold text-slate-600 uppercase mb-1">Telefone *</label>
-                  <input id="vetTel" type="text" required placeholder="Ex: (87) 99999-9999" value={telefone} onChange={(e) => setTelefone(e.target.value)} className="w-full px-4 py-2.5 rounded-sm border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-800 text-sm" />
-                </div>
-              </div>
-              <div>
-                <span className="block text-xs font-bold text-slate-600 uppercase mb-2">Clínica(s) de Atuação *</span>
-                <div className="max-h-36 overflow-y-auto space-y-2 border border-slate-200 p-3 rounded-sm bg-slate-50/50">
-                  {clinicas.map((c) => {
-                    const checkboxId = `clinica-checkbox-${c.id}`;
-                    return (
-                      <label key={c.id} htmlFor={checkboxId} className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer select-none">
-                        <input
-                          id={checkboxId}
-                          type="checkbox"
-                          checked={selectedClinicaIds.includes(c.id)}
-                          onChange={() => handleCheckboxClinicaChange(c.id)}
-                          className="rounded-sm border-slate-300 text-teal-600 focus:ring-teal-500 w-4 h-4 cursor-pointer"
-                        />
-                        <span>{c.nome}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-200/60 mt-6">
-                <button type="button" onClick={handleCloseModal} className="px-5 py-2.5 rounded-sm font-semibold text-slate-600 hover:bg-slate-100 text-sm transition cursor-pointer">Cancelar</button>
-                <button type="submit" className="px-5 py-2.5 rounded-sm font-semibold bg-teal-500 hover:bg-teal-600 text-white text-sm shadow-md transition cursor-pointer">
-                  {editingVet ? 'Salvar Alterações' : 'Cadastrar'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
