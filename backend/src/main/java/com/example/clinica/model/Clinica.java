@@ -27,7 +27,7 @@ public class Clinica {
     private String endereco;
 
     @ManyToMany(mappedBy = "clinicas")
-    @JsonIgnoreProperties("clinicas")
+    @JsonIgnoreProperties("clinicas") // Impede que o Veterinário dentro da Clínica chame a Clínica de novo
     private List<Veterinario> veterinarios;
 
     public Clinica() {}

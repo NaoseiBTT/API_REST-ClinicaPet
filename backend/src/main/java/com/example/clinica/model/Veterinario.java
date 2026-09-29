@@ -44,6 +44,6 @@ public class Veterinario {
             joinColumns = @JoinColumn(name = "veterinario_id"),
             inverseJoinColumns = @JoinColumn(name = "clinica_id")
     )
-    @JsonIgnoreProperties("veterinarios")
+    @JsonIgnoreProperties("veterinarios") // Impede que a Clínica dentro do Veterinário chame o Veterinário de novo
     private List<Clinica> clinicas;
 }
