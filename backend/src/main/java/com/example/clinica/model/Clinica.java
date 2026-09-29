@@ -1,6 +1,16 @@
 package com.example.clinica.model;
 
-import jakarta.persistence.*;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "tb_clinicas")
@@ -15,6 +25,10 @@ public class Clinica {
 
     private String telefone;
     private String endereco;
+
+    @ManyToMany(mappedBy = "clinicas")
+    @JsonIgnoreProperties("clinicas")
+    private List<Veterinario> veterinarios;
 
     public Clinica() {}
 
@@ -35,4 +49,7 @@ public class Clinica {
 
     public String getEndereco() { return endereco; }
     public void setEndereco(String endereco) { this.endereco = endereco; }
+
+    public List<Veterinario> getVeterinarios() { return veterinarios; }
+    public void setVeterinarios(List<Veterinario> veterinarios) { this.veterinarios = veterinarios; }
 }
