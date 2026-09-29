@@ -164,23 +164,18 @@ export default function VeterinariosPage() {
     }
 
     try {
-      const selectedId = Number(selectedClinicaIds[0]);
-
-      // Payload adaptado para atualização em APIs Spring Boot
-      const payload: Record<string, unknown> = {
+      // Ajuste limpo: envia apenas 'clinicas' se for lista, ou 'clinica' se for relação única.
+      // Como o Java geralmente espera a lista de objetos para ManyToMany, use:
+      const payload = {
         nome,
         crmv,
         especialidade,
         email,
         telefone,
-        // Envia clinica como Objeto e clinicas como Lista (compatível com ManyToOne e ManyToMany)
-        clinica: { id: selectedId },
         clinicas: selectedClinicaIds.map((id) => ({ id: Number(id) })),
       };
 
-      // Se for edição, inclui o ID do veterinário no corpo da requisição
       if (editingVet) {
-        payload.id = editingVet.id;
         await api.updateVeterinario(editingVet.id, payload);
       } else {
         await api.createVeterinario(payload);
@@ -190,7 +185,7 @@ export default function VeterinariosPage() {
       handleCloseModal();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Erro ao salvar veterinário.';
-      alert(`Falha ao salvar: ${msg}`);
+      alert(msg);
     }
   };
 
