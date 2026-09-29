@@ -164,17 +164,14 @@ export default function VeterinariosPage() {
     }
 
     try {
-      // Ajuste de Payload compatível com DTOs em Java (Spring Boot)
+      // ENVIANDO APENAS A CHAVE "clinicas" LIMPA PARA O SPRING BOOT
       const payload = {
         nome,
         crmv,
         especialidade,
         email,
         telefone,
-        clinicaId: selectedClinicaIds[0],
-        clinicaIds: selectedClinicaIds,
-        clinica: { id: selectedClinicaIds[0] },
-        clinicas: selectedClinicaIds.map((id) => ({ id })),
+        clinicas: selectedClinicaIds.map((id) => ({ id: Number(id) })),
       };
 
       if (editingVet) {
