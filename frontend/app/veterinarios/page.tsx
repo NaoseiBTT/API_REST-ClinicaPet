@@ -57,8 +57,8 @@ export default function VeterinariosPage() {
         api.getVeterinarios(),
         api.getClinicas(),
       ]);
-      setVeterinarios(vData);
-      setClinicas(cData);
+      setVeterinarios(Array.isArray(vData) ? vData : []);
+      setClinicas(Array.isArray(cData) ? cData : []);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Erro desconhecido ao carregar dados';
       console.error('Falha ao carregar dados da página de veterinários:', message);
@@ -164,15 +164,15 @@ export default function VeterinariosPage() {
     }
 
     try {
-      // Payload formatado para suportar diferentes estruturas aceitas no backend
+      // Ajuste de Payload compatível com DTOs em Java (Spring Boot)
       const payload = {
         nome,
         crmv,
         especialidade,
         email,
         telefone,
-        clinica_id: selectedClinicaIds[0],
         clinicaId: selectedClinicaIds[0],
+        clinicaIds: selectedClinicaIds,
         clinica: { id: selectedClinicaIds[0] },
         clinicas: selectedClinicaIds.map((id) => ({ id })),
       };
@@ -317,7 +317,7 @@ export default function VeterinariosPage() {
         {renderVeterinariosContent()}
       </section>
 
-      {/* MODAL SOBREPOSTO COM FUNDO ESCURECIDO / BORRADO */}
+      {/* MODAL SOBREPOSTO */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
           <div className="bg-white rounded-md shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200 my-8">
@@ -337,12 +337,29 @@ export default function VeterinariosPage() {
             <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
               <div>
                 <label htmlFor="vetNome" className="block text-xs font-bold text-slate-600 uppercase mb-1">Nome *</label>
-                <input id="vetNome" type="text" required placeholder="Ex: Dr. Carlos Silva" value={nome} onChange={(e) => setNome(e.target.value)} className="w-full px-4 py-2 rounded-sm border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-800 text-sm" />
+                <input
+                  id="vetNome"
+                  type="text"
+                  required
+                  placeholder="Ex: Dr. Carlos Silva"
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
+                  className="w-full px-4 py-2 rounded-sm border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-800 text-sm"
+                />
               </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="vetCrmv" className="block text-xs font-bold text-slate-600 uppercase mb-1">CRMV *</label>
-                  <input id="vetCrmv" type="text" required placeholder="Ex: 12345/PE" value={crmv} onChange={(e) => setCrmv(e.target.value)} className="w-full px-4 py-2 rounded-sm border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-800 text-sm" />
+                  <input
+                    id="vetCrmv"
+                    type="text"
+                    required
+                    placeholder="Ex: 12345/PE"
+                    value={crmv}
+                    onChange={(e) => setCrmv(e.target.value)}
+                    className="w-full px-4 py-2 rounded-sm border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-800 text-sm"
+                  />
                 </div>
                 <div>
                   <label htmlFor="vetEsp" className="block text-xs font-bold text-slate-600 uppercase mb-1">Especialidade *</label>
@@ -362,34 +379,56 @@ export default function VeterinariosPage() {
                   </select>
                 </div>
               </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="vetEmail" className="block text-xs font-bold text-slate-600 uppercase mb-1">E-mail *</label>
-                  <input id="vetEmail" type="email" required placeholder="Ex: carlos@gmail.com" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-2 rounded-sm border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-800 text-sm" />
+                  <input
+                    id="vetEmail"
+                    type="email"
+                    required
+                    placeholder="Ex: carlos@gmail.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-4 py-2 rounded-sm border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-800 text-sm"
+                  />
                 </div>
                 <div>
                   <label htmlFor="vetTel" className="block text-xs font-bold text-slate-600 uppercase mb-1">Telefone *</label>
-                  <input id="vetTel" type="text" required placeholder="Ex: (87) 99999-9999" value={telefone} onChange={(e) => setTelefone(e.target.value)} className="w-full px-4 py-2 rounded-sm border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-800 text-sm" />
+                  <input
+                    id="vetTel"
+                    type="text"
+                    required
+                    placeholder="Ex: (87) 99999-9999"
+                    value={telefone}
+                    onChange={(e) => setTelefone(e.target.value)}
+                    className="w-full px-4 py-2 rounded-sm border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-800 text-sm"
+                  />
                 </div>
               </div>
+
               <div>
                 <span className="block text-xs font-bold text-slate-600 uppercase mb-2">Clínica(s) de Atuação *</span>
                 <div className="max-h-32 overflow-y-auto space-y-2 border border-slate-200 p-3 rounded-sm bg-slate-50/50">
-                  {clinicas.map((c) => {
-                    const checkboxId = `clinica-checkbox-${c.id}`;
-                    return (
-                      <label key={c.id} htmlFor={checkboxId} className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer select-none">
-                        <input
-                          id={checkboxId}
-                          type="checkbox"
-                          checked={selectedClinicaIds.includes(c.id)}
-                          onChange={() => handleCheckboxClinicaChange(c.id)}
-                          className="rounded-sm border-slate-300 text-teal-600 focus:ring-teal-500 w-4 h-4 cursor-pointer"
-                        />
-                        <span>{c.nome}</span>
-                      </label>
-                    );
-                  })}
+                  {clinicas.length === 0 ? (
+                    <span className="text-xs text-slate-400">Nenhuma clínica disponível para seleção.</span>
+                  ) : (
+                    clinicas.map((c) => {
+                      const checkboxId = `clinica-checkbox-${c.id}`;
+                      return (
+                        <label key={c.id} htmlFor={checkboxId} className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer select-none">
+                          <input
+                            id={checkboxId}
+                            type="checkbox"
+                            checked={selectedClinicaIds.includes(c.id)}
+                            onChange={() => handleCheckboxClinicaChange(c.id)}
+                            className="rounded-sm border-slate-300 text-teal-600 focus:ring-teal-500 w-4 h-4 cursor-pointer"
+                          />
+                          <span>{c.nome}</span>
+                        </label>
+                      );
+                    })
+                  )}
                 </div>
               </div>
 
