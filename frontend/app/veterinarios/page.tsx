@@ -164,17 +164,23 @@ export default function VeterinariosPage() {
     }
 
     try {
-      // ENVIANDO APENAS A CHAVE "clinicas" LIMPA PARA O SPRING BOOT
-      const payload = {
+      const selectedId = Number(selectedClinicaIds[0]);
+
+      // Payload adaptado para atualização em APIs Spring Boot
+      const payload: Record<string, unknown> = {
         nome,
         crmv,
         especialidade,
         email,
         telefone,
+        // Envia clinica como Objeto e clinicas como Lista (compatível com ManyToOne e ManyToMany)
+        clinica: { id: selectedId },
         clinicas: selectedClinicaIds.map((id) => ({ id: Number(id) })),
       };
 
+      // Se for edição, inclui o ID do veterinário no corpo da requisição
       if (editingVet) {
+        payload.id = editingVet.id;
         await api.updateVeterinario(editingVet.id, payload);
       } else {
         await api.createVeterinario(payload);
@@ -184,7 +190,7 @@ export default function VeterinariosPage() {
       handleCloseModal();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Erro ao salvar veterinário.';
-      alert(msg);
+      alert(`Falha ao salvar: ${msg}`);
     }
   };
 
