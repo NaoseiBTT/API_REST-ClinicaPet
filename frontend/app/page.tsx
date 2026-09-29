@@ -117,7 +117,7 @@ export default function Home() {
             <h3 className="text-4xl font-black text-slate-900 mt-2 tracking-tight">{pacientes.length}</h3>
             <span className="inline-block mt-2 text-xs font-semibold text-teal-600 bg-teal-50 px-2 py-0.5 rounded-md">Atendidos</span>
           </div>
-          <div className="w-14 h-14 bg-teal-50 text-teal-600 rounded-1xl flex items-center justify-center text-2xl group-hover:bg-teal-500 group-hover:text-white transition-all duration-300 shadow-inner">
+          <div className="w-14 h-14 bg-teal-50 text-teal-600 rounded-2xl flex items-center justify-center text-2xl group-hover:bg-teal-500 group-hover:text-white transition-all duration-300 shadow-inner">
             🐾
           </div>
         </div>
