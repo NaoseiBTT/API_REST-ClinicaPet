@@ -164,14 +164,17 @@ export default function VeterinariosPage() {
     }
 
     try {
+      // Payload formatado para suportar diferentes estruturas aceitas no backend
       const payload = {
         nome,
         crmv,
         especialidade,
         email,
         telefone,
-        clinicas: selectedClinicaIds.map((id) => ({ id })),
+        clinica_id: selectedClinicaIds[0],
+        clinicaId: selectedClinicaIds[0],
         clinica: { id: selectedClinicaIds[0] },
+        clinicas: selectedClinicaIds.map((id) => ({ id })),
       };
 
       if (editingVet) {
