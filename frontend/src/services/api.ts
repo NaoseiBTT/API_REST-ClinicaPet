@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://clinica-backend-kpcl.onrender.com';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://clinica-backend-kpcl.onrender.com/api';
 
 export async function fetchFromAPI(endpoint: string, options?: RequestInit) {
   try {
