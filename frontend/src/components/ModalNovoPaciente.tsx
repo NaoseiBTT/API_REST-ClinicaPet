@@ -35,8 +35,8 @@ export default function ModalNovoPaciente({
       setNome(pacienteInicial.nome || '');
       setEspecie(pacienteInicial.especie || 'Cão');
       setRaca(pacienteInicial.raca || '');
-      setIdade(pacienteInicial.idade ? String(pacienteInicial.idade) : '');
-      setPeso(pacienteInicial.peso ? String(pacienteInicial.peso) : '');
+      setIdade(pacienteInicial.idade !== null && pacienteInicial.idade !== undefined ? String(pacienteInicial.idade) : '');
+      setPeso(pacienteInicial.peso !== null && pacienteInicial.peso !== undefined ? String(pacienteInicial.peso) : '');
 
       const cId = pacienteInicial.clinica?.id ?? pacienteInicial.clinicaId ?? '';
       const tId = pacienteInicial.tutor?.id ?? pacienteInicial.tutorId ?? '';
@@ -116,31 +116,36 @@ export default function ModalNovoPaciente({
       return;
     }
 
-    onSubmit({
+    const payload: any = {
       nome,
       especie,
       raca,
-      idade: idade ? Number(idade) : 0,
-      peso: peso ? Number(peso) : 0,
+      idade: idade !== '' ? Number(idade) : null,
+      peso: peso !== '' ? Number(peso) : null,
       tutor: { id: Number(tutorId) },
-      veterinario: veterinarioId ? { id: Number(veterinarioId) } : null,
       clinica: { id: Number(clinicaId) },
-    });
+    };
 
+    if (veterinarioId) {
+      payload.veterinario = { id: Number(veterinarioId) };
+    } else {
+      payload.veterinario = null;
+    }
+
+    onSubmit(payload);
     onClose();
   };
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-white/95 backdrop-blur-md rounded-sm max-w-lg w-full p-6 shadow-2xl border border-slate-200/80">
-        
         <div className="flex justify-between items-center pb-4 mb-5 border-b border-slate-200/60 bg-slate-50/50 -mx-6 -mt-6 px-6 pt-6">
           <h3 className="text-lg font-extrabold text-slate-900 tracking-tight">
             {pacienteInicial ? 'Editar Paciente' : 'Cadastrar Novo Paciente'}
           </h3>
-          <button 
-            type="button" 
-            onClick={onClose} 
+          <button
+            type="button"
+            onClick={onClose}
             className="text-slate-400 hover:text-slate-700 text-sm font-bold transition-colors cursor-pointer"
           >
             ✕
@@ -250,7 +255,7 @@ export default function ModalNovoPaciente({
 
           <div>
             <label htmlFor="selectTutor" className="block text-xs font-bold text-slate-600 uppercase mb-1">
-              2. Tutor
+              2. Tutor *
             </label>
             <select
               id="selectTutor"
