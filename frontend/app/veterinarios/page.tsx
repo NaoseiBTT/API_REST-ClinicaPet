@@ -171,8 +171,9 @@ export default function VeterinariosPage() {
     }
 
     try {
-      // Garante que todos os IDs selecionados nos checkboxes sejam números válidos
-      const clinicasPayload = selectedClinicaIds.map((id) => ({
+      // Converte explicitamente cada ID selecionado para número puro, 
+      // evitando que strings causem falha de deserialização no backend Java.
+      const clinicasFormatadas = selectedClinicaIds.map((id) => ({
         id: Number(id),
       }));
 
@@ -182,7 +183,7 @@ export default function VeterinariosPage() {
         especialidade,
         email,
         telefone,
-        clinicas: clinicasPayload,
+        clinicas: clinicasFormatadas,
       };
 
       if (editingVet) {
