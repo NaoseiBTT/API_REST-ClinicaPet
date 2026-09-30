@@ -171,14 +171,18 @@ export default function VeterinariosPage() {
     }
 
     try {
-      // PAYLOAD CORRIGIDO: Fornece o formato de lista de objetos que o VeterinarioService Java processa
+      // Garante que todos os IDs selecionados nos checkboxes sejam números válidos
+      const clinicasPayload = selectedClinicaIds.map((id) => ({
+        id: Number(id),
+      }));
+
       const payload = {
         nome,
         crmv,
         especialidade,
         email,
         telefone,
-        clinicas: selectedClinicaIds.map((id) => ({ id: Number(id) })),
+        clinicas: clinicasPayload,
       };
 
       if (editingVet) {
