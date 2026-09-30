@@ -164,8 +164,7 @@ export default function VeterinariosPage() {
     }
 
     try {
-      // Ajuste limpo: envia apenas 'clinicas' se for lista, ou 'clinica' se for relação única.
-      // Como o Java geralmente espera a lista de objetos para ManyToMany, use:
+      // PAYLOAD LIMPO: Enviando exclusivamente a lista "clinicas" para evitar erro 400 no backend Java
       const payload = {
         nome,
         crmv,
