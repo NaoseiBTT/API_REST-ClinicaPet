@@ -171,14 +171,14 @@ export default function VeterinariosPage() {
     }
 
     try {
-      // Enviando os IDs como um array de números inteiros puros, que o Spring Boot mapeia facilmente
+      // PAYLOAD CORRIGIDO: Fornece o formato de lista de objetos que o VeterinarioService Java processa
       const payload = {
         nome,
         crmv,
         especialidade,
         email,
         telefone,
-        clinicaIds: selectedClinicaIds.map((id) => Number(id)),
+        clinicas: selectedClinicaIds.map((id) => ({ id: Number(id) })),
       };
 
       if (editingVet) {
