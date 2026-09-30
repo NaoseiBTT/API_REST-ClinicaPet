@@ -133,42 +133,42 @@ export default function VeterinariosPage() {
   };
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!nome.trim() || !crmv.trim() || !especialidade.trim() || !email.trim() || !telefone.trim()) {
-      alert('Todos os campos de texto devem ser preenchidos.');
-      return;
+  if (!nome.trim() || !crmv.trim() || !especialidade.trim() || !email.trim() || !telefone.trim()) {
+    alert('Todos os campos de texto devem ser preenchidos.');
+    return;
+  }
+
+  if (selectedClinicaIds.length === 0) {
+    alert('Selecione pelo menos uma clínica para o veterinário.');
+    return;
+  }
+
+  try {
+    // Monta o payload sem campos duplicados
+    const payload = {
+      nome: nome.trim(),
+      crmv: crmv.trim(),
+      especialidade: especialidade.trim(),
+      email: email.trim(),
+      telefone: telefone.trim(),
+      clinicas: selectedClinicaIds.map((id) => ({ id })),
+    };
+
+    if (editingVet) {
+      await api.updateVeterinario(editingVet.id, payload);
+    } else {
+      await api.createVeterinario(payload);
     }
 
-    if (selectedClinicaIds.length === 0) {
-      alert('Selecione pelo menos uma clínica para o veterinário.');
-      return;
-    }
-
-    try {
-      // CORREÇÃO: Enviamos APENAS a lista 'clinicas' exigida pela relação ManyToMany
-      const payload = {
-        nome,
-        crmv,
-        especialidade,
-        email,
-        telefone,
-        clinicas: selectedClinicaIds.map((id) => ({ id })),
-      };
-
-      if (editingVet) {
-        await api.updateVeterinario(editingVet.id, payload);
-      } else {
-        await api.createVeterinario(payload);
-      }
-
-      await fetchData();
-      handleCloseForm();
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Erro ao salvar veterinário.';
-      alert(msg);
-    }
-  };
+    await fetchData();
+    handleCloseForm();
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Erro ao salvar veterinário.';
+    alert(msg);
+  }
+};
 
   const handleDelete = async (id: number) => {
     if (confirm('Tem certeza que deseja remover este veterinário?')) {
