@@ -171,14 +171,14 @@ export default function VeterinariosPage() {
     }
 
     try {
-      // Payload exatamente estruturado para o VeterinarioService / VeterinarioRepository do Java
+      // Enviando os IDs como um array de números inteiros puros, que o Spring Boot mapeia facilmente
       const payload = {
         nome,
         crmv,
         especialidade,
         email,
         telefone,
-        clinicas: selectedClinicaIds.map((id) => ({ id: Number(id) })),
+        clinicaIds: selectedClinicaIds.map((id) => Number(id)),
       };
 
       if (editingVet) {
