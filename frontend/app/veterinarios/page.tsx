@@ -120,19 +120,26 @@ export default function VeterinariosPage() {
     setTelefone(vet.telefone || '');
 
     const ids: number[] = [];
+    
     if (Array.isArray(vet.clinicas)) {
       vet.clinicas.forEach((c) => {
-        const id = typeof c === 'object' && c !== null ? c.id : Number(c);
-        if (id && !ids.includes(Number(id))) ids.push(Number(id));
+        const id = (typeof c === 'object' && c !== null && 'id' in c) ? Number((c as Clinica).id) : Number(c);
+        if (!isNaN(id) && id > 0 && !ids.includes(id)) ids.push(id);
       });
     }
+    
     if (vet.clinica) {
-      const id = typeof vet.clinica === 'object' && vet.clinica !== null ? vet.clinica.id : Number(vet.clinica);
-      if (id && !ids.includes(Number(id))) ids.push(Number(id));
+      const id = (typeof vet.clinica === 'object' && vet.clinica !== null && 'id' in vet.clinica) 
+        ? Number((vet.clinica as Clinica).id) 
+        : Number(vet.clinica);
+      if (!isNaN(id) && id > 0 && !ids.includes(id)) ids.push(id);
     }
-    if (vet.clinica_id && !ids.includes(Number(vet.clinica_id))) {
-      ids.push(Number(vet.clinica_id));
+
+    if (vet.clinica_id) {
+      const id = Number(vet.clinica_id);
+      if (!isNaN(id) && id > 0 && !ids.includes(id)) ids.push(id);
     }
+
     setSelectedClinicaIds(ids);
     setIsModalOpen(true);
   };
@@ -164,7 +171,7 @@ export default function VeterinariosPage() {
     }
 
     try {
-      // PAYLOAD LIMPO: Enviando exclusivamente a lista "clinicas" para evitar erro 400 no backend Java
+      // Payload exatamente estruturado para o VeterinarioService / VeterinarioRepository do Java
       const payload = {
         nome,
         crmv,
