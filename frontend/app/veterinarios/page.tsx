@@ -15,8 +15,6 @@ export interface Veterinario {
   especialidade?: string;
   email?: string;
   telefone?: string;
-  clinica_id?: number;
-  clinica?: Clinica | number | string;
   clinicas?: Clinica[];
 }
 
@@ -88,15 +86,6 @@ export default function VeterinariosPage() {
       });
     }
 
-    if (vet.clinica) {
-      const id = typeof vet.clinica === 'object' && vet.clinica !== null ? vet.clinica.id : Number(vet.clinica);
-      if (id) registrarNome(Number(id));
-    }
-
-    if (vet.clinica_id && nomesMap.size === 0) {
-      registrarNome(Number(vet.clinica_id));
-    }
-
     return Array.from(nomesMap.values());
   };
 
@@ -125,13 +114,6 @@ export default function VeterinariosPage() {
         const id = typeof c === 'object' && c !== null ? c.id : Number(c);
         if (id && !ids.includes(Number(id))) ids.push(Number(id));
       });
-    }
-    if (vet.clinica) {
-      const id = typeof vet.clinica === 'object' && vet.clinica !== null ? vet.clinica.id : Number(vet.clinica);
-      if (id && !ids.includes(Number(id))) ids.push(Number(id));
-    }
-    if (vet.clinica_id && !ids.includes(Number(vet.clinica_id))) {
-      ids.push(Number(vet.clinica_id));
     }
     setSelectedClinicaIds(ids);
     setIsFormVisible(true);
@@ -164,6 +146,7 @@ export default function VeterinariosPage() {
     }
 
     try {
+      // CORREÇÃO: Enviamos APENAS a lista 'clinicas' exigida pela relação ManyToMany
       const payload = {
         nome,
         crmv,
@@ -171,7 +154,6 @@ export default function VeterinariosPage() {
         email,
         telefone,
         clinicas: selectedClinicaIds.map((id) => ({ id })),
-        clinica: { id: selectedClinicaIds[0] },
       };
 
       if (editingVet) {
@@ -287,7 +269,7 @@ export default function VeterinariosPage() {
 
   return (
     <div className="space-y-6 pb-10">
-      {/* Formulário integrado na própria página (em substituição do modal) */}
+      {/* Formulário integrado na própria página */}
       {isFormVisible && (
         <section className="bg-white/90 backdrop-blur-md rounded-sm border border-slate-200/70 shadow-sm p-6 mb-6">
           <div className="flex justify-between items-center pb-4 mb-5 border-b border-slate-200/60">
